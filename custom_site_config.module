@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ * Customize site information & expose service url.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function custom_site_config_help($path) {
+  if ($path == 'admin/help#custom_site_config') {
+    $help = '<p>' . t("This module allows you to add apikey for the site & provides a URL that responds with a JSON representation of a given node using api key.") . '</p>';
+
+    return $help;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function custom_site_config_menu() {
+
+  $menu['page_json/%'] = array(
+      'title' => 'Json url',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('custom_site_config__transform_node_to_json'),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+  
+  return $menu;
+}
+
+/**
+ * Transforming node object to JSON format.
+ */
+function custom_site_config__transform_node_to_json() {
+  $arg = arg();
+  $access = FALSE;
+
+  // Perform the action for the url '/page_json/nid' only.
+  if ($arg[0] == 'page_json' && !empty($arg[1]) && is_numeric($arg[1])) {
+    if (!empty(variable_get('apikey'))) {
+      if ($node = node_load($arg[1])) {
+        // JSON data should be prepared for 'Page' content type only.
+        if ($node->type == 'page' && $node->status == 1) {
+          // Display JSON data of given node.
+          print drupal_json_encode($node);
+          $access = TRUE;
+          exit;
+        }  
+      }
+    } 
+  }
+
+  // If site API key is not set & the content type is not 'page', then denying
+  // accesss of the api url.
+  if ($access == FALSE) {
+    // Throw an error message 'Access Denied'.  
+    drupal_set_message('Access Denied' , 'error');
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function custom_site_config_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['site_api'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Site API information'),
+    );
+   
+    // Adding textbox for site API key.
+    $form['site_api']['apikey'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Site API Key'),
+      '#default_value' => variable_get('apikey'),
+      '#description' => t('Enter your site API secret key here.'),
+      '#required' => FALSE,
+    );
+
+    // If API Key value already set then change the button value from
+    // 'Save Configuration' to 'Update Configuration'.
+    if (!empty(variable_get('apikey'))) {
+      $form['actions']['submit']['#value'] = t('Update Configuration');
+    }
+
+    // Adding custom submit handler for this form.
+    $form['#submit'][] = 'custom_site_config__settings_form_submit';
+
+  }
+
+  return system_settings_form($form);
+}
+
+/**
+ * Submit handler for the form 'system_site_information_settings'.
+ */
+function custom_site_config__settings_form_submit(&$form, &$form_state) {
+  if (!empty($form_state['values']['apikey'])) {
+    $message = t('Site API Key has been saved with that value.');
+    // Display success message upon saving API key field value.
+    drupal_set_message($message);
+  }
+}

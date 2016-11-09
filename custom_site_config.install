@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Registering & removing custom variables.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function custom_site_config_install() {
+  // Setting default value of site api key.
+  variable_set('apikey', NULL);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function custom_site_config_uninstall() {
+  // Removing custom varible.
+  variable_del('apikey');
+}
