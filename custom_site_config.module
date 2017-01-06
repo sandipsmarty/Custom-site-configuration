@@ -21,7 +21,7 @@ function custom_site_config_help($path) {
  */
 function custom_site_config_menu() {
 
-  $menu['page_json/%'] = array(
+  $items['page_json/%'] = array(
       'title' => 'Json url',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('custom_site_config__transform_node_to_json'),
@@ -29,7 +29,7 @@ function custom_site_config_menu() {
       'type' => MENU_CALLBACK,
   );
   
-  return $menu;
+  return $items;
 }
 
 /**
