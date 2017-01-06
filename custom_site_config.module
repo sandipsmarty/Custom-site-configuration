@@ -23,8 +23,7 @@ function custom_site_config_menu() {
 
   $items['page_json/%'] = array(
       'title' => 'Json url',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('custom_site_config__transform_node_to_json'),
+      'page callback' => 'custom_site_config__transform_node_to_json',
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
   );
